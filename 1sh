@@ -1,0 +1,31 @@
+# Install Go
+sudo rm -rf /usr/local/go;
+curl https://dl.google.com/go/go1.19.2.linux-amd64.tar.gz | sudo tar -C/usr/local -zxvf - ;
+cat <<'EOF' >>$HOME/.profile
+export GOROOT=/usr/local/go
+export GOPATH=$HOME/go
+export GO111MODULE=on
+export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
+EOF
+source $HOME/.profile
+
+# Install required packages
+sudo apt-get update -y 
+sudo apt-get install curl build-essential wget jq git -y;
+
+# Install nibiru Node
+cd
+git clone https://github.com/NibiruChain/nibiru
+cd nibiru
+git checkout  v0.19.2
+make install
+
+# 初始化节点
+read -e -p "请输入验证者名字: " moniker
+nibid init $moniker --chain-id=nibiru-itn-1
+nibid config chain-id nibiru-itn-1
+
+# 下载Genesis 文件
+curl -s https://rpc.itn-1.nibiru.fi/genesis | jq -r .result.genesis >  ~/.nibid/config/genesis.json
+
+# 设置peer和seed
